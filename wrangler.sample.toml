@@ -1,0 +1,19 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "email-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-09"
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "KV"
+id = "xxxxxxxxxxxx"
+
+[vars]
+FORWARD_TO = "your_email@gmail.com"
+TELEGRAM_BOT_TOKEN = "666:xxxxx"
+TELEGRAM_CHAT_IDS = "00000,11111"
+EMAIL_WHITELIST = "cursor.sh,example@domain.com"
+CODE_KEYWORDS = "验证码,code,校验码,动态码,口令,验证"
+WECOM_BOT_GUID= "xxxx-xxxx,yyyyy-yyyy"
