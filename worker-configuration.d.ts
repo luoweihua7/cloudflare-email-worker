@@ -8,4 +8,5 @@ interface Env {
   EMAIL_WHITELIST: string;
   CODE_KEYWORDS: string;
   WECOM_BOT_GUID?: string;
+  MESSAGE_EXPIRATION_TTL?: string;
 }

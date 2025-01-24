@@ -1,15 +1,19 @@
 import PostalMime from 'postal-mime';
 
+export type EmailType = 'text' | 'markdown';
+
 export interface ParsedMessage {
-  from: string; // Sender
-  to: string; // Recipient
-  subject: string; // Subject
+  from: string; // Email sender
+  to: string; // Email recipient
+  subject: string; // Email subject
   text: string; // Plain text content
   html?: string; // HTML content
-  date?: Date; // Send time
-  messageId?: string; // Email ID
-  inReplyTo?: string; // Reply to email ID
-  references?: string[]; // Related email ID list
+  date?: Date; // Send timestamp
+  messageId?: string; // Email message ID
+  inReplyTo?: string; // Reply to message ID
+  references?: string[]; // Related message ID list
+  toText(): string;
+  toMarkdown(): string;
 }
 
 interface MessageConfig {
@@ -77,6 +81,28 @@ export default class MessageHelper {
       messageId: email.messageId,
       inReplyTo: email.inReplyTo,
       references: email.references,
+      toText: function (): string {
+        const sections = [`From: ${this.from}`, `To: ${this.to}`, `Subject: ${this.subject}`];
+
+        if (this.date) {
+          sections.push(`Date: ${this.date.toLocaleString()}`);
+        }
+
+        sections.push('', this.text.replace(/\n{2,}/g, '\n\n').replace(/```/g, ''));
+
+        return sections.join('\n');
+      },
+      toMarkdown: function (): string {
+        const sections = [`**From:** ${this.from}`, `**To:** ${this.to}`, `**Subject:** ${this.subject}`];
+
+        if (this.date) {
+          sections.push(`**Date:** ${this.date.toLocaleString()}`);
+        }
+
+        sections.push('', this.text.replace(/\n{2,}/g, '\n\n'));
+
+        return sections.join('\n');
+      },
     };
   }
 
@@ -94,9 +120,8 @@ export default class MessageHelper {
   /**
    * Process verification code text
    */
-  processText(text: string): string {
+  processText(text: string, type: EmailType = 'markdown'): string {
     let processedText = text;
-
     const hasCodeKeyword = this.codeKeywords.some((keyword) => text.toLowerCase().includes(keyword));
 
     if (hasCodeKeyword) {
@@ -104,7 +129,7 @@ export default class MessageHelper {
       if (codes) {
         codes.map((code) => {
           const newCode = code.replace(/\s+/g, '');
-          processedText = processedText.replace(code, ['```', newCode, '```'].join('\n'));
+          processedText = processedText.replace(code, type === 'text' ? newCode : ['```', newCode, '```'].join('\n'));
           console.log(`Verification code: ${newCode}`);
           return newCode;
         });

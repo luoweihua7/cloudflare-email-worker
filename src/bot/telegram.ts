@@ -53,23 +53,10 @@ export default class TelegramMessage {
    * @private
    */
   private format(message: ParsedMessage): string {
-    const { from, to, subject, text, date } = message;
-
-    const sections = [
-      `*From:* ${this.escapeMarkdown(from)}`,
-      `*To:* ${this.escapeMarkdown(to)}`,
-      `*Subject:* ${this.escapeMarkdown(subject)}`,
-    ];
-
-    // Add date information if exists
-    if (date) {
-      sections.push(`*Date:* ${this.escapeMarkdown(date.toLocaleString())}`);
-    }
-
-    // Add message body
-    sections.push('', this.escapeMarkdown(text).replace(/\n{2,}/g, '\n'));
-
-    return sections.join('\n');
+    // Get markdown formatted message
+    const markdownText = message.toMarkdown();
+    // Escape special characters
+    return this.escapeMarkdown(markdownText);
   }
 
   /**

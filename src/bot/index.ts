@@ -5,10 +5,14 @@ import WeComMessage from './wecom';
 export class Bot {
   private bots: (TelegramMessage | WeComMessage)[] = [];
   private kv: KVNamespace;
+  private ttl: number;
 
   constructor(env: Env) {
     // Save KV instance
     this.kv = env.KV;
+    
+    // 从环境变量读取过期时间，如果未设置则使用默认值（2天 = 172800秒）
+    this.ttl = parseInt(env.MESSAGE_EXPIRATION_TTL || '86400');
 
     // Initialize Telegram bot
     if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_IDS) {
@@ -49,8 +53,8 @@ export class Bot {
    * @private
    */
   private async markMessageAsSent(messageId: string): Promise<void> {
-    // Set KV with 2-hour expiration
-    await this.kv.put(messageId, '1', { expirationTtl: 7200 });
+    // 使用配置的过期时间
+    await this.kv.put(messageId, '1', { expirationTtl: this.ttl });
   }
 
   /**

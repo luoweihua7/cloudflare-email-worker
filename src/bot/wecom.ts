@@ -4,6 +4,8 @@ interface WeComConfig {
   guid: string; // Support multiple GUIDs, separated by commas
 }
 
+type WeComMessageType = 'text' | 'markdown';
+
 export default class WeComMessage {
   private readonly webhookUrls: string[];
 
@@ -36,22 +38,11 @@ export default class WeComMessage {
   }
 
   /**
-   * Format message to Markdown format
+   * Format message to specified type
    * @private
    */
-  private format(message: ParsedMessage): string {
-    const { from, to, subject, text, date } = message;
-
-    const sections = [`**From:** ${from}`, `**To:** ${to}`, `**Subject:** ${subject}`];
-
-    if (date) {
-      sections.push(`**Date:** ${date.toLocaleString()}`);
-    }
-
-    // Add message body with original format
-    sections.push('', text);
-
-    return sections.join('\n');
+  private format(message: ParsedMessage, type: WeComMessageType = 'markdown'): string {
+    return type === 'text' ? message.toText() : message.toMarkdown();
   }
 
   /**
@@ -60,12 +51,12 @@ export default class WeComMessage {
    * @returns Promise<PromiseSettledResult<Response>[]>
    */
   async send(message: ParsedMessage): Promise<PromiseSettledResult<Response>[]> {
-    const formattedText = this.format(message);
+    const formattedText = this.format(message, 'text');
 
     const promises = this.webhookUrls.map(async (webhookUrl) => {
       const body = {
-        msgtype: 'markdown',
-        markdown: {
+        msgtype: 'text',
+        text: {
           content: formattedText,
         },
       };
