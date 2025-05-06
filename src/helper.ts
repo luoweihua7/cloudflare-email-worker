@@ -48,14 +48,15 @@ export default class MessageHelper {
    * @param from Sender address
    * @returns Whether in whitelist
    */
-  isWhitelisted(from: string): boolean {
+  checkIsWhitelist(from: string): boolean {
     const emailLower = from.toLowerCase();
 
     return this.whitelistItems.some((item) => {
       if (item.includes('@')) {
         return emailLower === item;
       }
-      return emailLower.endsWith(`@${item}`) || emailLower.endsWith(`.${item}`);
+
+      return emailLower.endsWith(`${item}`);
     });
   }
 
@@ -88,7 +89,7 @@ export default class MessageHelper {
           sections.push(`Date: ${this.date.toLocaleString()}`);
         }
 
-        sections.push('', this.text.replace(/\n{2,}/g, '\n\n').replace(/```/g, ''));
+        sections.push('', this.text.replace(/\n{2,}/g, '\n').replace(/```/g, ''));
 
         return sections.join('\n');
       },
@@ -99,7 +100,7 @@ export default class MessageHelper {
           sections.push(`**Date:** ${this.date.toLocaleString()}`);
         }
 
-        sections.push('', this.text.replace(/\n{2,}/g, '\n\n'));
+        sections.push('', this.text.replace(/\n{2,}/g, '\n'));
 
         return sections.join('\n');
       },
@@ -137,5 +138,16 @@ export default class MessageHelper {
     }
 
     return processedText;
+  }
+
+  /**
+   * 批量转发邮件（测试）
+   * @param forwardTo {string}
+   * @param message {ForwardableEmailMessage}
+   */
+  forwardMessage(forwardTo, message) {
+    const receivers = forwardTo.split(/\s?,\s?/).filter((_) => Boolean);
+    const promises = receivers.map((rec) => message.forward(rec));
+    return Promise.allSettled(promises);
   }
 }

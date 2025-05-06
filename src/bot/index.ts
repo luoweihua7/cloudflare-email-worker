@@ -43,7 +43,7 @@ export class Bot {
    * Check if message has been sent before
    * @private
    */
-  private async isMessageSent(messageId: string): Promise<boolean> {
+  private async checkIsMessageSent(messageId: string): Promise<boolean> {
     const sent = await this.kv.get(messageId);
     return sent !== null;
   }
@@ -69,8 +69,8 @@ export class Bot {
       console.warn('Message ID is missing, proceeding without deduplication');
     } else {
       // Check if message was already sent
-      const sent = await this.isMessageSent(messageId);
-      if (sent) {
+      const isSent = await this.checkIsMessageSent(messageId);
+      if (isSent) {
         console.log(`Message ${messageId} was already sent, skipping`);
         return [];
       }
